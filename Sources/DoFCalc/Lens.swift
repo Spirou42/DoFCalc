@@ -62,6 +62,13 @@ public struct Lens : Hashable, Equatable, Codable, Comparable{
     }
     return lhs.minimalFocalDistance < rhs.minimalFocalDistance
   }
-
   
+  public enum CodingKeys:String, CodingKey{
+    case manufacturer = "Manufacturer"
+    case modelName = "Model"
+    case maxAperture = "MaximumAperture"
+    case minAperture = "MinimumAperture"
+    case focalLength = "FocalLength"
+    case minimalFocalDistance = "MinimalFocalDistance"
+  }
 }

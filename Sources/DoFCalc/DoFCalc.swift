@@ -1,5 +1,4 @@
 /**
- 
  DoFCalc.swift
  
  Implementation fo the basic calculator for DoF calculations
@@ -24,7 +23,8 @@ public struct DoFCalc{
     self.lens = lens
   }
   /// Calulates the hyperfocal distance for a given aperture and zeiss Value
-  /// the retrun value is in mm
+  /// the return value is in mm
+
   public func calcHyperfocalDistance(aperture:Double, zeissValue:Double) throws -> Double {
     if aperture < lens.maxAperture {
       throw DoFCalcErrors.ApertureToBig(maxAperture: lens.maxAperture)
@@ -43,7 +43,7 @@ public struct DoFCalc{
     return try calcHyperfocalDistance(aperture: aperture, zeissValue: Double(zeiss.rawValue))
   }
   
-  /// Calculates the near distance of acceptable sharpness in mm for the given values. The Object distance is in mm
+  /// Calculates the near distance of acceptable sharpness in mm for the given values. The Object distance is in mm!
   public func calcNearDistance(objectDistance:Double, aperture:Double, zeissValue:Double) throws -> Double {
 
     if objectDistance < self.lens.minimalFocalDistance{
@@ -60,7 +60,17 @@ public struct DoFCalc{
     return try calcNearDistance(objectDistance: objectDistance, aperture: aperture, zeissValue: Double(zeiss.rawValue))
   }
   
+  /// Calculates the far distance of acceptable sharpness in mm for the given values. The object distance is in mm!
   public func calcFarDistance(objectDistance:Double, aperture:Double,zeissValue:Double) throws -> Double{
-    return 0.0
+    let H = try calcHyperfocalDistance(aperture: aperture, zeissValue: zeissValue)
+    let f = lens.focalLength
+    let p = objectDistance*(H-f)
+    let q = H - objectDistance
+    return p / q
   }
+
+  public func calcFarDistance(objectDistance:Double, aperture:Double, zeiss:Sensor.ZeissFormula) throws -> Double{
+    return try calcFarDistance(objectDistance: objectDistance, aperture: aperture, zeissValue: Double(zeiss.rawValue))
+  }
+  
 }
