@@ -34,8 +34,8 @@ final class DoFCalcTests: XCTestCase {
       sensor = Sensor.TwoThird
       XCTAssertEqual(sensor.size,CGSize(width: 8.6.mm, height: 6.6.mm),"TwoThird Size Failed")
       
-      XCTAssertEqual(Sensor.ZeissFormula.traditional.rawValue, 1000,"Zeiss Traditional failed")
-      XCTAssertEqual(Sensor.ZeissFormula.modern.rawValue, 1500,"Zeiss Modern failed")
-      XCTAssertEqual(Sensor.ZeissFormula.classic.rawValue, 1730,"Zeiss classic failed")
+      XCTAssertEqual(Sensor.ZeissRatio.traditional.rawValue, 1000,"Zeiss Traditional failed")
+      XCTAssertEqual(Sensor.ZeissRatio.modern.rawValue, 1500,"Zeiss Modern failed")
+      XCTAssertEqual(Sensor.ZeissRatio.classic.rawValue, 1730,"Zeiss classic failed")
     }
 }

@@ -6,6 +6,8 @@
  */
 
 import Foundation
+import SwiftUI
+
 /// Lens describes a simple Lens in the DoF calculation model
 /// The lens is described by its optical parameters as there are:
 /// maximum aperture and minimum aperture ( defined as a=2^(i/2) with i⋲ℕ)
@@ -15,24 +17,25 @@ import Foundation
 /// and the model of the lens.
 
 
-public struct Lens : Hashable, Equatable, Codable, Comparable{
+public class Lens : Hashable, Equatable, Codable, Comparable, ObservableObject{
 
   /// Name of the Mannufacturer
-  public var manufacturer:String
+  @Published public var manufacturer:String = ""
 
   /// an optional model name
-  public var modelName:String
+  @Published public var modelName:String = ""
+
   /// maximum aperture of the lens
-  public var maxAperture:Double
+  @Published public var maxAperture:Double = 1.4
 
   /// minmal aperture of the lens
-  public var minAperture:Double = 22.0
+  @Published public var minAperture:Double = 22.0
 
   /// focal length. At the moment we do not support zoom lenses.
-  public var focalLength:Double
+  @Published public var focalLength:Double = 50.0.mm
 
   /// the minimal focus distance of this lens
-  public var minimalFocalDistance:Double = 0.0.mm
+  @Published public var minimalFocalDistance:Double = 35.0.cm
   
   public func hash(into hasher: inout Hasher) {
     hasher.combine(manufacturer)
@@ -63,6 +66,35 @@ public struct Lens : Hashable, Equatable, Codable, Comparable{
     return lhs.minimalFocalDistance < rhs.minimalFocalDistance
   }
   
+  public init(manufacturer:String, modelName:String, maxAperture:Double, minAperture:Double, focalLength:Double, minimalFocalDistance:Double){
+    self.manufacturer = manufacturer
+    self.modelName = modelName
+    self.maxAperture = maxAperture
+    self.minAperture = minAperture
+    self.focalLength = focalLength
+    self.minimalFocalDistance = minimalFocalDistance
+  }
+  
+  public required init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    manufacturer = try container.decode(String.self, forKey: .manufacturer)
+    modelName = try container.decode(String.self, forKey: .modelName)
+    maxAperture = try container.decode(Double.self, forKey: .maxAperture)
+    minAperture = try container.decode(Double.self, forKey: .minAperture)
+    focalLength = try container.decode(Double.self, forKey: .focalLength)
+    minimalFocalDistance = try container.decode(Double.self, forKey: .minimalFocalDistance)
+  }
+  
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(manufacturer, forKey: .manufacturer)
+    try container.encode(modelName, forKey: .modelName)
+    try container.encode(maxAperture, forKey: .maxAperture)
+    try container.encode(minAperture, forKey: .minAperture)
+    try container.encode(focalLength, forKey: .focalLength)
+    try container.encode(minimalFocalDistance, forKey: .minimalFocalDistance)
+  }
+  
   public enum CodingKeys:String, CodingKey{
     case manufacturer = "Manufacturer"
     case modelName = "Model"
@@ -72,3 +104,24 @@ public struct Lens : Hashable, Equatable, Codable, Comparable{
     case minimalFocalDistance = "MinimalFocalDistance"
   }
 }
+
+public class Lenses : Codable{
+  @Published public var lenses:[Lens] = []
+  
+  public required init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    lenses = try container.decode([Lens].self, forKey: .lenses)
+  }
+  
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(lenses, forKey: .lenses)
+  }
+  
+  public enum CodingKeys:String, CodingKey{
+    case lenses = "Lenses"
+  }
+  
+  
+}
+

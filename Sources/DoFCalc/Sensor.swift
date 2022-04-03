@@ -21,7 +21,7 @@ public struct Sensor: Hashable,Codable,Equatable{
   public static var TwoThird:Sensor{get{return Sensor(width: 8.6.mm, height: 6.6.mm)}}
    
   
-  public enum ZeissFormula:Int {
+  public enum ZeissRatio:Int {
     case classic 			= 1730
     case traditional 	= 1000
     case modern 			= 1500
@@ -56,12 +56,12 @@ public struct Sensor: Hashable,Codable,Equatable{
     return diagonal/Double(formula)
   }
   
-  public func calcCoC(withZeiss formula:ZeissFormula) -> Double{
+  public func calcCoC(withZeiss formula:ZeissRatio) -> Double{
     return calcCoC(withCustom: Double(formula.rawValue))
   }
   
   public func calcCoC() -> Double {
-    return calcCoC(withZeiss: ZeissFormula.modern)
+    return calcCoC(withZeiss: ZeissRatio.modern)
   }
   
 }
