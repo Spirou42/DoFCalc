@@ -12,17 +12,17 @@
 import Foundation
 
 public extension Double{
-	public var mm:Double {return self * 1.0}
-  public var cm:Double {return self * 10.0}
-  public var dm:Double {return self * 100.0}
-  public var m:Double  {return self * 1000.0}
-  public var km:Double { return self * 100000.0}
+  var mm:Double {return self * 1.0}
+  var cm:Double {return self * 10.0}
+  var dm:Double {return self * 100.0}
+  var m:Double  {return self * 1000.0}
+  var km:Double { return self * 100000.0}
 }
 
 public extension Float {
-  public var mm:Float {return self * 1.0}
-  public var cm:Float {return self * 10.0}
-  public var dm:Float {return self * 100.0}
-  public var m:Float  {return self * 1000.0}
-  public var km:Float { return self * 100000.0}
+  var mm:Float {return self * 1.0}
+  var cm:Float {return self * 10.0}
+  var dm:Float {return self * 100.0}
+  var m:Float  {return self * 1000.0}
+  var km:Float { return self * 100000.0}
 }
