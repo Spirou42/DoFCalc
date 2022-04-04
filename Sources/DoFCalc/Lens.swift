@@ -37,13 +37,33 @@ public class Lens : Hashable, Equatable, Codable, Comparable, ObservableObject{
   /// the minimal focus distance of this lens
   @Published public var minimalFocalDistance:Double = 35.0.cm
   
+  
+  public static func apertureForIndex(_ index:Int) -> Double{
+    return Double(pow(2.0, Double(index)/2.0))
+  }
+  
+  public static func indexForAperture(_ aperture: Double) -> Int {
+    return Int(round(2*log2(aperture)))
+  }
+  
+  public func getMinApertureIndex() -> Int{
+    return Lens.indexForAperture(minAperture)
+  }
+  
+  public func getMaxApertureIndex() -> Int{
+    return Lens.indexForAperture(maxAperture)
+  }
+  
+  
+  
+  
   public func hash(into hasher: inout Hasher) {
     hasher.combine(manufacturer)
     hasher.combine(modelName)
     hasher.combine(maxAperture)
     hasher.combine(focalLength)
   }
-  
+
   public static func == (lhs:Lens, rhs:Lens) -> Bool {
     return lhs.hashValue == rhs.hashValue
   }
@@ -64,6 +84,9 @@ public class Lens : Hashable, Equatable, Codable, Comparable, ObservableObject{
       return lhs.minAperture < rhs.minAperture
     }
     return lhs.minimalFocalDistance < rhs.minimalFocalDistance
+  }
+  public convenience init(){
+    self.init(manufacturer: "", modelName: "", maxAperture: 1.4, minAperture: 22, focalLength: 50, minimalFocalDistance: 38.0.cm)
   }
   
   public init(manufacturer:String, modelName:String, maxAperture:Double, minAperture:Double, focalLength:Double, minimalFocalDistance:Double){
