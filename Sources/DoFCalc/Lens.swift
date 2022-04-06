@@ -16,7 +16,6 @@ import SwiftUI
 /// As well as the name of the Manufacturer
 /// and the model of the lens.
 
-
 public class Lens : Hashable, Equatable, Codable, Comparable, ObservableObject{
 
   /// Name of the Mannufacturer
@@ -53,9 +52,6 @@ public class Lens : Hashable, Equatable, Codable, Comparable, ObservableObject{
   public func getMaxApertureIndex() -> Int{
     return Lens.indexForAperture(maxAperture)
   }
-  
-  
-  
   
   public func hash(into hasher: inout Hasher) {
     hasher.combine(manufacturer)
