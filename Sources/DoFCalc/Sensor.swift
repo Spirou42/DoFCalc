@@ -7,9 +7,11 @@
  */
 
 import Foundation
+import CoreGraphics
 // Simple Sensor model
 
-public struct Sensor: Hashable,Codable,Equatable{
+
+public class Sensor: Hashable,Codable,Equatable{
 
   public static var FullFrame:Sensor{ get { return Sensor(width: 36.mm, height: 24.mm) } }
   public static var ASPH:Sensor{ get {return Sensor(width: 28.7.mm, height: 19.mm)}}
@@ -32,6 +34,12 @@ public struct Sensor: Hashable,Codable,Equatable{
   public var diagonal:Double{
     get {
       return Double((size.width*size.width + size.height*size.height)).squareRoot()
+    }
+  }
+  
+  public var sizeString:String{
+    get {
+      return String(format: "%0.1fmm x %0.1fmm", size.width, size.height)
     }
   }
   
@@ -63,5 +71,19 @@ public struct Sensor: Hashable,Codable,Equatable{
   public func calcCoC() -> Double {
     return calcCoC(withZeiss: ZeissRatio.modern)
   }
+}
+
+public class Sensors: ObservableObject {
+  @Published public var knownSensors:[String:Sensor] = [:]
   
+  public init(){
+    knownSensors["1. Full Frame"] = Sensor.FullFrame
+    knownSensors["2. ASP-H (Canon)"] = Sensor.ASPH
+    knownSensors["3. ASP-C (Nikon, Sony...)"] = Sensor.ASPC
+    knownSensors["4. ASP-C (Canon)"] = Sensor.ASPCanon
+    knownSensors["5. Foveon"] = Sensor.Foveon
+    knownSensors["6. µ 4/3"] = Sensor.MicroFourThird
+    knownSensors["7. 1\""] = Sensor.OneInch
+    knownSensors["8. 2/3\""] = Sensor.TwoThird
+  }
 }
