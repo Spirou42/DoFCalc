@@ -9,7 +9,7 @@
  */
 
 import Darwin
-
+import SwiftUI
 
 /// Error thrown by the DoFCalc
 public enum DoFCalcErrors : Error {
@@ -21,19 +21,81 @@ public enum DoFCalcErrors : Error {
   
   /// thrown in case the given distance is smaller than the minimal focal distance of the lens
   case ObjectDistanceToLow(minObjectDistance: Double)
+  
+  case LensNotIntialized
+  
+  case SensorNotInitialized
 }
 
 /// provides the basic DoF calculation interface.
 public struct DoFCalc{
-  public var sensor:Sensor
-  public var lens:Lens
+  public var sensor:Sensor?
+  public var lens:Lens?
   
-  public init(sensor: Sensor, lens:Lens) {
+  public init(_ sensor: Sensor? = nil, _ lens:Lens? = nil) {
     self.sensor = sensor
     self.lens = lens
   }
-
   
+  public func hyperFocalDistance(aperture:Double, zeissQuotient:Double) -> Measurement<UnitLength> {
+    var distance = 0.0
+    do {
+      distance = try self.calcHyperfocalDistance(aperture: aperture, zeissQuotient: zeissQuotient)
+    }catch{
+      distance = 0.0
+    }
+    
+    return Measurement(value: distance, unit: UnitLength.millimeters)
+  }
+  
+  public func nearFocalDistance(objectDistance:Double, aperture:Double,zeissQuotient:Double) -> Measurement<UnitLength> {
+    var distance = 0.0
+    do {
+      distance = try self.calcNearDistance(objectDistance: objectDistance, aperture: aperture, zeissQuotient: zeissQuotient)
+    }catch{
+      distance = 0.0
+    }
+    return Measurement(value: distance, unit: UnitLength.millimeters)
+  }
+  
+  public func farFocalDistance(objectDistance:Double, aperture:Double,zeissQuotient:Double) -> Measurement<UnitLength> {
+    var distance = 0.0
+    do {
+      distance = try self.calcFarDistance(objectDistance: objectDistance, aperture: aperture, zeissQuotient: zeissQuotient)
+
+    }catch{
+      distance = 0.0
+    }
+    return Measurement(value: distance, unit: UnitLength.millimeters)
+  }
+  
+
+  public func calcHyperDistance(aperture: Double, zeissQuotient:Double) -> Double {
+    do {
+      let distance = try self.calcHyperfocalDistance(aperture: aperture, zeissQuotient: zeissQuotient)
+      return distance
+    }catch{
+      return 0.0
+    }
+  }
+  
+  public func calcNear(objectDistance:Double, aperture:Double,zeissQuotient:Double) -> Double {
+    do {
+      let distance = try self.calcNearDistance(objectDistance: objectDistance, aperture: aperture, zeissQuotient: zeissQuotient)
+      return distance
+    }catch{
+      return 0.0
+    }
+  }
+  
+  public func calcFar(objectDistance:Double, aperture:Double,zeissQuotient:Double) -> Double {
+    do {
+      let distance = try self.calcFarDistance(objectDistance: objectDistance, aperture: aperture, zeissQuotient: zeissQuotient)
+      return distance
+    }catch{
+      return 0.0
+    }
+  }
   
   /// Calulates the hyperfocal distance.
   ///
@@ -46,15 +108,18 @@ public struct DoFCalc{
   /// - Throws: `DoFCalcErrors.ApertureToBig` and `DoFCalcError.ApertureToBig` if the aperture value excedes the range defined by the lens
   ///
   public func calcHyperfocalDistance(aperture:Double, zeissQuotient:Double) throws -> Double {
-    if aperture < lens.maxAperture {
-      throw DoFCalcErrors.ApertureToBig(maxAperture: lens.maxAperture)
+    guard let intLens = self.lens else { throw DoFCalcErrors.LensNotIntialized}
+    guard let intSensor = self.sensor else {throw DoFCalcErrors.SensorNotInitialized}
+
+    if aperture < intLens.maxAperture {
+      throw DoFCalcErrors.ApertureToBig(maxAperture: intLens.maxAperture)
     }
-    if aperture > lens.minAperture {
-      throw DoFCalcErrors.ApertureToSmall(minAperture: lens.minAperture)
+    if aperture > intLens.minAperture {
+      throw DoFCalcErrors.ApertureToSmall(minAperture: intLens.minAperture)
     }
-    let f = lens.focalLength
-    let coc = sensor.calcCoC(withCustom: zeissQuotient)
-    let h = (f*f/aperture*coc)+f
+    let f = intLens.focalLength
+    let coc = intSensor.calcCoC(withCustom: zeissQuotient)
+    let h = ( (f*f) / (aperture*coc) )+f
     return h
   }
   
@@ -67,12 +132,13 @@ public struct DoFCalc{
   /// Calculates the near distance of acceptable sharpness in mm for ta given aperture (a=2^(i/2) with i⋲ℕ) and zeiss quotient.
   ///  The Object distance is in mm!
   public func calcNearDistance(objectDistance:Double, aperture:Double, zeissQuotient:Double) throws -> Double {
-
-    if objectDistance < self.lens.minimalFocalDistance{
-      throw DoFCalcErrors.ObjectDistanceToLow(minObjectDistance: self.lens.minimalFocalDistance)
+    guard let intLens = self.lens else{ throw DoFCalcErrors.LensNotIntialized}
+    
+    if objectDistance < intLens.minimalFocalDistance{
+      throw DoFCalcErrors.ObjectDistanceToLow(minObjectDistance: intLens.minimalFocalDistance)
     }
     let H = try calcHyperfocalDistance(aperture: aperture, zeissQuotient: zeissQuotient)
-    let f = lens.focalLength
+    let f = intLens.focalLength
     let p = objectDistance*(H-f)
     let q = (H+objectDistance) - (2*f)
     return p/q
@@ -84,8 +150,14 @@ public struct DoFCalc{
   
   /// Calculates the far distance of acceptable sharpness in mm for the given values. The object distance is in mm!
   public func calcFarDistance(objectDistance:Double, aperture:Double,zeissQuotient:Double) throws -> Double{
+    guard let intLens = self.lens else { throw DoFCalcErrors.LensNotIntialized}
+
+    if objectDistance < intLens.minimalFocalDistance{
+      throw DoFCalcErrors.ObjectDistanceToLow(minObjectDistance: intLens.minimalFocalDistance)
+    }
+    
     let H = try calcHyperfocalDistance(aperture: aperture, zeissQuotient: zeissQuotient)
-    let f = lens.focalLength
+    let f = intLens.focalLength
     let p = objectDistance*(H-f)
     let q = H - objectDistance
     return p / q
