@@ -9,7 +9,8 @@
  */
 
 import Darwin
-import SwiftUI
+import Foundation
+//import SwiftUI
 
 /// Error thrown by the DoFCalc
 public enum DoFCalcErrors : Error {
@@ -105,7 +106,7 @@ public struct DoFCalc{
   ///
   /// - Returns: the hyperfocal distance in mm
   ///
-  /// - Throws: `DoFCalcErrors.ApertureToBig` and `DoFCalcError.ApertureToBig` if the aperture value excedes the range defined by the lens
+  /// - Throws: `DoFCalcErrors.ApertureToBig` and `DoFCalcError.ApertureToSmall` if the aperture value excedes the range defined by the lens
   ///
   public func calcHyperfocalDistance(aperture:Double, zeissQuotient:Double) throws -> Double {
     guard let intLens = self.lens else { throw DoFCalcErrors.LensNotIntialized}
@@ -131,6 +132,16 @@ public struct DoFCalc{
   
   /// Calculates the near distance of acceptable sharpness in mm for ta given aperture (a=2^(i/2) with i⋲ℕ) and zeiss quotient.
   ///  The Object distance is in mm!
+  
+  
+  /// Calculates the near distance of acceptable sharpness.
+  /// - Parameters:
+  ///   - objectDistance: focus distance to the object in milimeters
+  ///   - aperture: the aperture value, given as 2^(i/2) with i⋲ℕ. i.e. 1.4, 2.0, 2.8
+  ///   - zeissQuotient: the Zeissquotient for calculating the CoC
+  /// - Returns: the near distance of acceptable sharpness in milimeters
+  ///
+  ///- Throws: `DoFCalcError.ObjectDistanceToLow`if the current object distance if smaller than the minimal focus distance of the Lens. This method also throws the errors of calcHyperfocalDistance.
   public func calcNearDistance(objectDistance:Double, aperture:Double, zeissQuotient:Double) throws -> Double {
     guard let intLens = self.lens else{ throw DoFCalcErrors.LensNotIntialized}
     
